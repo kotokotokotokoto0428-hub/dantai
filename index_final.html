@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>都城市中心市街地中核施設｜団体区分・料金区分 自動判定システム</title>
+<style>
+:root{
+  --navy:#16324f;
+  --blue:#2563eb;
+  --light:#f4f7fb;
+  --line:#d9e1ea;
+  --green:#16845b;
+  --green-bg:#eaf8f1;
+  --red:#c83b3b;
+  --red-bg:#fff0f0;
+  --text:#1f2937;
+  --muted:#64748b;
+  --white:#fff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--light);
+  font-family:"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  color:var(--text);
+  line-height:1.7;
+}
+header{
+  background:linear-gradient(135deg,var(--navy),#24527b);
+  color:#fff;
+  padding:28px 20px;
+}
+.header-inner{max-width:980px;margin:auto}
+h1{font-size:24px;margin:0 0 6px;font-weight:700}
+.subtitle{font-size:14px;opacity:.9}
+.container{max-width:980px;margin:28px auto;padding:0 18px}
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:0 5px 18px rgba(15,23,42,.06);
+  padding:28px;
+  margin-bottom:20px;
+}
+
+/* 画面切替はJavaScriptを使わず、URLの#（フラグメント）だけで行います */
+.screen{display:none}
+#q1{display:block}
+.screen:target{display:block}
+
+.step-label{
+  font-size:13px;
+  color:var(--blue);
+  font-weight:700;
+  margin-bottom:7px;
+}
+.progress{
+  height:8px;
+  background:#e7edf4;
+  border-radius:99px;
+  overflow:hidden;
+  margin:8px 0 24px;
+}
+.progress-bar{height:100%;background:var(--blue)}
+.p20{width:20%}.p40{width:40%}.p60{width:60%}.p80{width:80%}.p100{width:100%}
+
+h2{font-size:21px;margin:0 0 12px}
+.help{
+  font-size:13px;
+  color:var(--muted);
+  background:#f8fafc;
+  border-left:4px solid #94a3b8;
+  padding:10px 13px;
+  margin-bottom:18px;
+}
+.options{display:grid;gap:12px}
+.option{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:#fff;
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:15px 17px;
+  text-decoration:none;
+  color:var(--text);
+  transition:.15s;
+}
+.option:hover{
+  border-color:var(--blue);
+  background:#f8fbff;
+  transform:translateY(-1px);
+}
+.option strong{display:block;margin-bottom:2px}
+.option span{font-size:13px;color:var(--muted)}
+
+.actions{
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  margin-top:22px;
+  flex-wrap:wrap;
+}
+.btn{
+  display:inline-block;
+  border:0;
+  border-radius:9px;
+  padding:11px 18px;
+  font-weight:700;
+  text-decoration:none;
+  cursor:pointer;
+  font-size:14px;
+}
+.btn.secondary{background:#e9eef5;color:#334155}
+.btn.primary{background:var(--blue);color:#fff}
+.result.profit{background:var(--red-bg);border:2px solid #efb0b0}
+.result.nonprofit{background:var(--green-bg);border:2px solid #a8dec6}
+.result h2{font-size:25px}
+.badge{
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:99px;
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+.profit .badge{background:#f7caca;color:#8f2020}
+.nonprofit .badge{background:#c8eedc;color:#126341}
+.reason-box{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:17px;
+  margin:15px 0;
+}
+.reason-box h3{font-size:15px;margin:0 0 7px}
+.reason-box p{margin:5px 0;font-size:14px}
+.notice{
+  background:#fff8e6;
+  border:1px solid #f0d38a;
+  border-radius:10px;
+  padding:14px;
+  font-size:13px;
+  margin-top:14px;
+}
+.checkbox{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  margin-top:18px;
+  padding:14px;
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:10px;
+  font-size:13px;
+}
+.checkbox input{margin-top:5px;transform:scale(1.2)}
+.footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  padding:20px;
+}
+.small{font-size:12px;color:var(--muted)}
+@media(max-width:650px){
+  h1{font-size:19px}
+  .card{padding:20px}
+  .actions{flex-direction:column}
+  .btn{width:100%;text-align:center}
+  .option{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1>都城市中心市街地中核施設</h1>
+    <div class="subtitle">団体区分・料金区分 自動判定システム（職員窓口用）</div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- STEP 1 -->
+  <section id="q1" class="screen card">
+    <div class="step-label">STEP 1</div>
+    <div class="progress"><div class="progress-bar p20"></div></div>
+    <h2>利用団体の「区分・格（主体）」を選択してください</h2>
+    <div class="help">まず、利用主体の法人格・事業形態を確認します。</div>
+
+    <div class="options">
+      <a class="option" href="#profit-a">
+        <strong>A. 営利企業</strong>
+        <span>株式会社、合同会社、有限会社等</span>
+      </a>
+
+      <a class="option" href="#profit-b">
+        <strong>B. 個人事業主・士業事務所</strong>
+        <span>確定申告を行う個人事業、教室・塾・施術・コンサル・美容・サロン等、弁護士・税理士・司法書士等</span>
+      </a>
+
+      <a class="option" href="#q2">
+        <strong>C. 一般社団法人・一般財団法人</strong>
+        <span>一般社団法人または一般財団法人</span>
+      </a>
+
+      <a class="option" href="#q3">
+        <strong>D. その他の非営利法人・公的機関</strong>
+        <span>NPO、社会福祉法人、学校法人、宗教法人、認可地縁団体、商工会議所、農協、労働組合、国・地方自治体等</span>
+      </a>
+
+      <a class="option" href="#q4_1">
+        <strong>E. 任意団体・市民サークル・一般個人</strong>
+        <span>確定申告を要しない市民・ボランティア活動等</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section id="q2" class="screen card">
+    <div class="step-label">STEP 2</div>
+    <div class="progress"><div class="progress-bar p40"></div></div>
+    <h2>税法上の「非営利型」に該当しますか？</h2>
+    <div class="help">一般社団・一般財団法人のみ。定款等で確認できる場合に「はい」を選択します。</div>
+
+    <div class="options">
+      <a class="option" href="#q3">
+        <strong>はい</strong>
+        <span>非営利型法人の要件を満たしている（定款の写し等の確認が必要）</span>
+      </a>
+
+      <a class="option" href="#profit-c">
+        <strong>いいえ／分からない</strong>
+        <span>非営利型でない、または確認できない</span>
+      </a>
+    </div>
+
+    <div class="actions">
+      <a class="btn secondary" href="#q1">← 前の質問</a>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section id="q3" class="screen card">
+    <div class="step-label">STEP 3</div>
+    <div class="progress"><div class="progress-bar p60"></div></div>
+    <h2>今回の具体的な利用目的に、営業・ビジネス行為が含まれますか？</h2>
+    <div class="help">1つでも該当すれば「はい」。</div>
+
+    <div class="options">
+      <a class="option" href="#profit-d">
+        <strong>はい</strong>
+        <span>商品の販売・受注／有料展示・商談／企業・サービスのPR・広告・デモ／顧客獲得目的の有料セミナー・相談会／求人・採用・会社説明会等</span>
+      </a>
+
+      <a class="option" href="#nonprofit-c">
+        <strong>いいえ</strong>
+        <span>上記のいずれにも該当しない、純粋な公益活動・地域活動等</span>
+      </a>
+    </div>
+
+    <div class="actions">
+      <a class="btn secondary" href="#q1">← STEP 1へ</a>
+    </div>
+  </section>
+
+  <!-- STEP 4-1 -->
+  <section id="q4_1" class="screen card">
+    <div class="step-label">STEP 4</div>
+    <div class="progress"><div class="progress-bar p80"></div></div>
+    <h2>予約・申請の主体は、講師・指導者本人または講師が運営するスクール関係者ですか？</h2>
+    <div class="help">講師自身が予約して集客・レッスンを行う場合は「はい」。</div>
+
+    <div class="options">
+      <a class="option" href="#profit-e">
+        <strong>はい</strong>
+        <span>講師・指導者が主催する教室、スクール、レッスン等</span>
+      </a>
+
+      <a class="option" href="#q4_2">
+        <strong>いいえ</strong>
+        <span>受講者・市民等が主体となってサークル活動のために予約</span>
+      </a>
+    </div>
+
+    <div class="actions">
+      <a class="btn secondary" href="#q1">← STEP 1へ</a>
+    </div>
+  </section>
+
+  <!-- STEP 4-2 -->
+  <section id="q4_2" class="screen card">
+    <div class="step-label">STEP 4</div>
+    <div class="progress"><div class="progress-bar p80"></div></div>
+    <h2>参加者から参加費・受講料・月謝・会費・入場料等を徴収しますか？</h2>
+    <div class="help">名称にかかわらず、参加者から徴収する金銭を確認します。</div>
+
+    <div class="options">
+      <a class="option" href="#q4_4">
+        <strong>いいえ（完全無料）</strong>
+        <span>参加者から金銭を徴収しない</span>
+      </a>
+
+      <a class="option" href="#q4_3">
+        <strong>はい</strong>
+        <span>何らかの参加費・受講料・会費等を徴収する</span>
+      </a>
+    </div>
+
+    <div class="actions">
+      <a class="btn secondary" href="#q4_1">← 前の質問</a>
+    </div>
+  </section>
+
+  <!-- STEP 4-3 -->
+  <section id="q4_3" class="screen card">
+    <div class="step-label">STEP 4</div>
+    <div class="progress"><div class="progress-bar p80"></div></div>
+    <h2>1人1回あたりの徴収額は「500円以下」かつ「実費のみ」ですか？</h2>
+    <div class="help">500円以下でも、講師謝礼・運営維持費等を含む場合は「いいえ」。</div>
+
+    <div class="options">
+      <a class="option" href="#q4_4">
+        <strong>はい</strong>
+        <span>500円以下で、材料費・教材費等の当日消費する実費相当のみ</span>
+      </a>
+
+      <a class="option" href="#profit-f">
+        <strong>いいえ</strong>
+        <span>501円以上、または講師謝礼・運営維持費等を含む</span>
+      </a>
+    </div>
+
+    <div class="actions">
+      <a class="btn secondary" href="#q4_2">← 前の質問</a>
+    </div>
+  </section>
+
+  <!-- STEP 4-4 -->
+  <section id="q4_4" class="screen card">
+    <div class="step-label">STEP 4</div>
+    <div class="progress"><div class="progress-bar p80"></div></div>
+    <h2>今回の利用目的に、販売・ビジネスPR・勧誘等が含まれますか？</h2>
+    <div class="help">商品の販売、企業・個人ビジネスの広告宣伝、PR、他サービスへの勧誘等を確認します。</div>
+
+    <div class="options">
+      <a class="option" href="#profit-g">
+        <strong>はい</strong>
+        <span>販売・広告・PR・勧誘等が含まれる</span>
+      </a>
+
+      <a class="option" href="#nonprofit-e">
+        <strong>いいえ</strong>
+        <span>営業行為は含まれない</span>
+      </a>
+    </div>
+
+    <div class="actions">
+      <a class="btn secondary" href="#q4_3">← 前の質問</a>
+    </div>
+  </section>
+
+  <!-- 営利結果 -->
+  <section id="profit-a" class="screen card result profit">
+    <span class="badge">営利判定</span>
+    <h2>判定：『営利目的等（営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>営利企業が利用主体であるため</p>
+      <h3>【根拠・運用上の考え方】</h3>
+      <p>利用主体が営利企業であるため、営利目的等（営利料金）の判定条件に該当します。</p>
+    </div>
+    <div class="notice">
+      <strong>重要：</strong>本判定は申告された内容を前提としています。実際の利用内容と申請内容が異なる場合は、条例・管理運用規程等に基づく対応が必要となる場合があります。
+    </div>
+    <label class="checkbox">
+      <input type="checkbox">
+      <span>申請内容（利用主体、金銭徴収の有無・金額、販売・PR・勧誘等）に虚偽がないことを確認しました。実際の利用内容と申請内容に相違がある場合、適用される条例・規程に基づく対応が行われる場合があることを確認しました。</span>
+    </label>
+    <div class="actions">
+      <a class="btn primary" href="#q1">次の団体を判定する</a>
+    </div>
+  </section>
+
+  <section id="profit-b" class="screen card result profit">
+    <span class="badge">営利判定</span>
+    <h2>判定：『営利目的等（営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>個人事業・士業等の事業活動が利用主体であるため</p>
+      <h3>【根拠・運用上の考え方】</h3>
+      <p>個人事業主・士業事務所による事業活動が利用主体であるため、営利目的等（営利料金）の判定条件に該当します。</p>
+    </div>
+    <div class="notice"><strong>重要：</strong>本判定は申告された内容を前提としています。実際の利用内容と申請内容が異なる場合は、条例・管理運用規程等に基づく対応が必要となる場合があります。</div>
+    <label class="checkbox"><input type="checkbox"><span>申請内容に虚偽がないことを確認しました。</span></label>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <section id="profit-c" class="screen card result profit">
+    <span class="badge">営利判定</span>
+    <h2>判定：『営利目的等（営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>非営利型であることを確認できない一般社団・一般財団法人であるため</p>
+    </div>
+    <div class="notice"><strong>確認：</strong>一般社団・一般財団法人については、非営利型であることを定款の写し等で確認してください。</div>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <section id="profit-d" class="screen card result profit">
+    <span class="badge">営利判定</span>
+    <h2>判定：『営利目的等（営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>今回の利用に営業・ビジネス行為が含まれるため</p>
+    </div>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <section id="profit-e" class="screen card result profit">
+    <span class="badge">営利判定</span>
+    <h2>判定：『営利目的等（営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>講師・指導者が主催する有料教室・スクールとみなされるため</p>
+    </div>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <section id="profit-f" class="screen card result profit">
+    <span class="badge">営利判定</span>
+    <h2>判定：『営利目的等（営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>徴収額が500円を超える、または純粋な実費を超える金銭を徴収するため</p>
+    </div>
+    <div class="notice"><strong>確認：</strong>500円以下でも、講師謝礼・運営維持費等を含む場合は営利判定となります。</div>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <section id="profit-g" class="screen card result profit">
+    <span class="badge">営利判定</span>
+    <h2>判定：『営利目的等（営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>利用内容に販売・広告・PR・勧誘等の営業行為が含まれるため</p>
+    </div>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <!-- 非営利結果 -->
+  <section id="nonprofit-c" class="screen card result nonprofit">
+    <span class="badge">非営利判定</span>
+    <h2>判定：『営利目的等以外（非営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>非営利法人・公的機関による利用で、営業・ビジネス行為がないため</p>
+    </div>
+    <div class="notice">
+      <strong>一般社団・一般財団法人：</strong>初回団体登録時は、定款の写し等により非営利型であることを確認してください。
+    </div>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <section id="nonprofit-e" class="screen card result nonprofit">
+    <span class="badge">非営利判定</span>
+    <h2>判定：『営利目的等以外（非営利料金）』が適用されます</h2>
+    <div class="reason-box">
+      <h3>【適用された判定理由】</h3>
+      <p>非営利の市民活動で、営業行為がなく、料金条件も非営利基準を満たすため</p>
+    </div>
+    <div class="notice">
+      <strong>確認書類：</strong>材料費の内訳書、当日使用する材料の領収書等、500円以下かつ実費であることを確認できる資料の提示・アップロードを求める場合があります。
+    </div>
+    <div class="actions"><a class="btn primary" href="#q1">次の団体を判定する</a></div>
+  </section>
+
+  <div class="footer">
+    ※本システムは、提示された条件分岐仕様書に基づく職員向け判定補助画面です。<br>
+    実際の運用開始前に、最新の条例・管理運用規程・施設の正式な運用基準との整合性を必ず確認してください。
+  </div>
+</main>
+</body>
+</html>
